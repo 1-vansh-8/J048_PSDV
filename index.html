@@ -1,12 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Blog</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.24.0/cytoscape.min.js"></script>
 </head>
+
 <body>
-    <h1>Welcome to My Blog</h1>
-    <p>This is my first webpage using GitHub Pages!</p>
+    <h2>My Cytoscape Graph</h2>
+    <div id="cy" style="width: 800px; height: 600px; border: 1px solid black;"></div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var cy = cytoscape({
+                container: document.getElementById('cy'), // Target div
+
+                elements: [ // Graph elements
+                    { data: { id: 'A' } },
+                    { data: { id: 'B' } },
+                    { data: { id: 'C' } },
+                    { data: { source: 'A', target: 'B' } },
+                    { data: { source: 'B', target: 'C' } }
+                ],
+
+                style: [ // Node and edge styling
+                    {
+                        selector: 'node',
+                        style: {
+                            'background-color': '#007bff',
+                            'label': 'data(id)',
+                            'color': '#fff',
+                            'text-valign': 'center',
+                            'text-halign': 'center'
+                        }
+                    },
+                    {
+                        selector: 'edge',
+                        style: {
+                            'width': 2,
+                            'line-color': '#ccc',
+                            'target-arrow-shape': 'triangle'
+                        }
+                    }
+                ],
+
+                layout: { // Graph layout
+                    name: 'grid',
+                    rows: 2
+                }
+            });
+        });
+    </script>
 </body>
+
 </html>
