@@ -3,88 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cytoscape Graph</title>
-
-    <!-- Include Cytoscape.js -->
-    <script src="https://unpkg.com/cytoscape@3.23.0/dist/cytoscape.min.js"></script>
-
+    <title>Delhi Metro Network - Cytoscape.js</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.24.0/cytoscape.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
-        #cy { width: 90vw; height: 80vh; margin: auto; border: 1px solid black; }
-        .tooltip { position: absolute; background: black; color: white; padding: 5px; border-radius: 5px; font-size: 12px; }
+        #cy { width: 100vw; height: 90vh; display: block; margin: auto; }
     </style>
 </head>
 <body>
-
-    <h1>Interactive Cytoscape.js Graph</h1>
+    <h2>Delhi Metro Network - Cytoscape.js</h2>
     <div id="cy"></div>
 
     <script>
-        // Initialize Cytoscape
         let cy = cytoscape({
             container: document.getElementById('cy'),
-            elements: generateRandomGraph(20, 40), // Generates 20 nodes & 40 edges
-            style: [
-                { selector: 'node', style: { 'background-color': '#007bff', 'label': 'data(label)', 'text-valign': 'center', 'color': 'white' } },
-                { selector: 'edge', style: { 'line-color': '#ccc', 'width': 'mapData(weight, 1, 10, 2, 8)', 'curve-style': 'bezier', 'label': 'data(weight)' } },
-                { selector: ':selected', style: { 'border-width': 3, 'border-color': 'red' } },
-                { selector: '.highlighted', style: { 'background-color': 'yellow', 'line-color': 'yellow', 'transition-duration': '0.5s' } }
+
+            elements: [
+                // 🟢 Green Line
+                { data: { id: 'Kashmere Gate', label: 'Kashmere Gate' } },
+                { data: { id: 'Inderlok', label: 'Inderlok' } },
+                { data: { id: 'Ashok Park Main', label: 'Ashok Park Main' } },
+                { data: { id: 'Kirti Nagar', label: 'Kirti Nagar' } },
+                
+                { data: { id: 'Kashmere-Inderlok', source: 'Kashmere Gate', target: 'Inderlok', line: 'green' } },
+                { data: { id: 'Inderlok-Ashok', source: 'Inderlok', target: 'Ashok Park Main', line: 'green' } },
+                { data: { id: 'Ashok-Kirti', source: 'Ashok Park Main', target: 'Kirti Nagar', line: 'green' } },
+
+                // 🔴 Red Line
+                { data: { id: 'Rithala', label: 'Rithala' } },
+                { data: { id: 'Rohini West', label: 'Rohini West' } },
+                { data: { id: 'Netaji Subhash Place', label: 'Netaji Subhash Place' } },
+                
+                { data: { id: 'Rithala-Rohini', source: 'Rithala', target: 'Rohini West', line: 'red' } },
+                { data: { id: 'Rohini-Netaji', source: 'Rohini West', target: 'Netaji Subhash Place', line: 'red' } },
+
+                // 🔵 Blue Line
+                { data: { id: 'Dwarka', label: 'Dwarka' } },
+                { data: { id: 'Rajouri Garden', label: 'Rajouri Garden' } },
+                { data: { id: 'Karol Bagh', label: 'Karol Bagh' } },
+
+                { data: { id: 'Dwarka-Rajouri', source: 'Dwarka', target: 'Rajouri Garden', line: 'blue' } },
+                { data: { id: 'Rajouri-Karol', source: 'Rajouri Garden', target: 'Karol Bagh', line: 'blue' } },
+
+                // Interchange Stations
+                { data: { id: 'Rajiv Chowk', label: 'Rajiv Chowk' } },
+                { data: { id: 'Kashmere Gate', label: 'Kashmere Gate' } },
+
+                { data: { id: 'Karol-Rajiv', source: 'Karol Bagh', target: 'Rajiv Chowk', line: 'blue' } },
+                { data: { id: 'Netaji-Rajiv', source: 'Netaji Subhash Place', target: 'Rajiv Chowk', line: 'red' } },
+                { data: { id: 'Kashmere-Rajiv', source: 'Kashmere Gate', target: 'Rajiv Chowk', line: 'yellow' } }
             ],
-            layout: { name: 'cose', animate: true }, // Force-directed layout
-            userZoomingEnabled: true, 
-            userPanningEnabled: true
+
+            style: [
+                { selector: 'node', style: { 'background-color': '#666', 'label': 'data(label)', 'text-valign': 'center', 'color': 'white', 'font-size': '12px' } },
+                { selector: 'edge', style: { 'width': 5, 'curve-style': 'bezier' } },
+
+                // 🟢 Green Line
+                { selector: 'edge[line="green"]', style: { 'line-color': 'green' } },
+                // 🔴 Red Line
+                { selector: 'edge[line="red"]', style: { 'line-color': 'red' } },
+                // 🔵 Blue Line
+                { selector: 'edge[line="blue"]', style: { 'line-color': 'blue' } },
+                // 🟡 Yellow Line
+                { selector: 'edge[line="yellow"]', style: { 'line-color': 'yellow' } }
+            ],
+
+            layout: { name: 'circle' }
         });
 
-        // Function to generate a random graph
-        function generateRandomGraph(nodeCount, edgeCount) {
-            let nodes = [], edges = [];
-            for (let i = 0; i < nodeCount; i++) {
-                nodes.push({ data: { id: `N${i}`, label: `Node ${i}` } });
-            }
-            for (let i = 0; i < edgeCount; i++) {
-                let src = `N${Math.floor(Math.random() * nodeCount)}`;
-                let tgt = `N${Math.floor(Math.random() * nodeCount)}`;
-                if (src !== tgt) edges.push({ data: { id: `${src}-${tgt}`, source: src, target: tgt, weight: Math.floor(Math.random() * 10) + 1 } });
-            }
-            return { nodes, edges };
-        }
-
-        // Node click event: Show shortest path using Dijkstra
+        // Node click event
         cy.on('tap', 'node', function (event) {
             let node = event.target;
-            cy.elements().removeClass('highlighted');
-            let dijkstra = cy.elements().dijkstra(node);
-            dijkstra.pathTo(cy.$('#N5')).addClass('highlighted');
-        });
-
-        // PageRank Algorithm (Importance of Nodes)
-        cy.nodes().forEach(n => {
-            let rank = Math.random(); // Replace with actual PageRank logic
-            n.data('rank', rank);
-            n.style('width', rank * 50 + 'px');
-            n.style('height', rank * 50 + 'px');
-        });
-
-        // Graph Traversal: Depth-First Search (DFS)
-        cy.elements().dfs({
-            roots: '#N0',
-            visit: function (node) { console.log("DFS visiting: ", node.id()); }
-        });
-
-        // Add tooltips using vanilla JS
-        cy.on('mouseover', 'node', function (event) {
-            let node = event.target;
-            let tooltip = document.createElement('div');
-            tooltip.className = 'tooltip';
-            tooltip.innerText = `Node: ${node.id()}`;
-            document.body.appendChild(tooltip);
-            tooltip.style.left = event.renderedPosition.x + 'px';
-            tooltip.style.top = event.renderedPosition.y + 'px';
-
-            node.on('mouseout', function () { tooltip.remove(); });
+            alert("Station: " + node.id());
         });
     </script>
-
 </body>
 </html>
+
 
