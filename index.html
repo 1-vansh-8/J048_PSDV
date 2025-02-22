@@ -1,81 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.24.0/cytoscape.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cytoscape Graph</title>
+
+    <!-- Include Cytoscape.js -->
+    <script src="https://unpkg.com/cytoscape@3.23.0/dist/cytoscape.min.js"></script>
+
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        #cy { width: 90vw; height: 80vh; margin: auto; border: 1px solid black; }
+        .tooltip { position: absolute; background: black; color: white; padding: 5px; border-radius: 5px; font-size: 12px; }
+    </style>
 </head>
-
 <body>
-    // Initialize Cytoscape with advanced settings
-let cy = cytoscape({
-  container: document.getElementById('cy'),
 
-  elements: generateRandomGraph(20, 40), // Generates a random network with 20 nodes, 40 edges
+    <h1>Interactive Cytoscape.js Graph</h1>
+    <div id="cy"></div>
 
-  style: [
-    { selector: 'node', style: { 'background-color': '#007bff', 'label': 'data(label)', 'font-size': '12px', 'text-valign': 'center', 'color': 'white' } },
-    { selector: 'edge', style: { 'line-color': '#ccc', 'width': 'mapData(weight, 1, 10, 2, 8)', 'curve-style': 'bezier', 'label': 'data(weight)' } },
-    { selector: ':selected', style: { 'border-width': 3, 'border-color': 'red' } },
-    { selector: '.highlighted', style: { 'background-color': 'yellow', 'line-color': 'yellow', 'transition-duration': '0.5s' } }
-  ],
+    <script>
+        // Initialize Cytoscape
+        let cy = cytoscape({
+            container: document.getElementById('cy'),
+            elements: generateRandomGraph(20, 40), // Generates 20 nodes & 40 edges
+            style: [
+                { selector: 'node', style: { 'background-color': '#007bff', 'label': 'data(label)', 'text-valign': 'center', 'color': 'white' } },
+                { selector: 'edge', style: { 'line-color': '#ccc', 'width': 'mapData(weight, 1, 10, 2, 8)', 'curve-style': 'bezier', 'label': 'data(weight)' } },
+                { selector: ':selected', style: { 'border-width': 3, 'border-color': 'red' } },
+                { selector: '.highlighted', style: { 'background-color': 'yellow', 'line-color': 'yellow', 'transition-duration': '0.5s' } }
+            ],
+            layout: { name: 'cose', animate: true }, // Force-directed layout
+            userZoomingEnabled: true, 
+            userPanningEnabled: true
+        });
 
-  layout: { name: 'cose', animate: true }, // Force-directed layout for better visualization
+        // Function to generate a random graph
+        function generateRandomGraph(nodeCount, edgeCount) {
+            let nodes = [], edges = [];
+            for (let i = 0; i < nodeCount; i++) {
+                nodes.push({ data: { id: `N${i}`, label: `Node ${i}` } });
+            }
+            for (let i = 0; i < edgeCount; i++) {
+                let src = `N${Math.floor(Math.random() * nodeCount)}`;
+                let tgt = `N${Math.floor(Math.random() * nodeCount)}`;
+                if (src !== tgt) edges.push({ data: { id: `${src}-${tgt}`, source: src, target: tgt, weight: Math.floor(Math.random() * 10) + 1 } });
+            }
+            return { nodes, edges };
+        }
 
-  userZoomingEnabled: true, 
-  userPanningEnabled: true
-});
+        // Node click event: Show shortest path using Dijkstra
+        cy.on('tap', 'node', function (event) {
+            let node = event.target;
+            cy.elements().removeClass('highlighted');
+            let dijkstra = cy.elements().dijkstra(node);
+            dijkstra.pathTo(cy.$('#N5')).addClass('highlighted');
+        });
 
-// Function to generate a random graph
-function generateRandomGraph(nodeCount, edgeCount) {
-  let nodes = [], edges = [];
-  for (let i = 0; i < nodeCount; i++) {
-    nodes.push({ data: { id: N${i}, label: Node ${i} } });
-  }
-  for (let i = 0; i < edgeCount; i++) {
-    let src = N${Math.floor(Math.random() * nodeCount)};
-    let tgt = N${Math.floor(Math.random() * nodeCount)};
-    if (src !== tgt) edges.push({ data: { id: ${src}-${tgt}, source: src, target: tgt, weight: Math.floor(Math.random() * 10) + 1 } });
-  }
-  return { nodes, edges };
-}
+        // PageRank Algorithm (Importance of Nodes)
+        cy.nodes().forEach(n => {
+            let rank = Math.random(); // Replace with actual PageRank logic
+            n.data('rank', rank);
+            n.style('width', rank * 50 + 'px');
+            n.style('height', rank * 50 + 'px');
+        });
 
-// Node click event: Show shortest path using Dijkstra
-cy.on('tap', 'node', function (event) {
-  let node = event.target;
-  cy.elements().removeClass('highlighted');
-  let dijkstra = cy.elements().dijkstra(node);
-  dijkstra.pathTo(cy.$('#N5')).addClass('highlighted');
-});
+        // Graph Traversal: Depth-First Search (DFS)
+        cy.elements().dfs({
+            roots: '#N0',
+            visit: function (node) { console.log("DFS visiting: ", node.id()); }
+        });
 
-// PageRank Algorithm (Importance of Nodes)
-cy.nodes().forEach(n => {
-  let rank = Math.random(); // Replace with actual PageRank logic
-  n.data('rank', rank);
-  n.style('width', rank * 50 + 'px');
-  n.style('height', rank * 50 + 'px');
-});
+        // Add tooltips using vanilla JS
+        cy.on('mouseover', 'node', function (event) {
+            let node = event.target;
+            let tooltip = document.createElement('div');
+            tooltip.className = 'tooltip';
+            tooltip.innerText = `Node: ${node.id()}`;
+            document.body.appendChild(tooltip);
+            tooltip.style.left = event.renderedPosition.x + 'px';
+            tooltip.style.top = event.renderedPosition.y + 'px';
 
-// Clustering (Community Detection)
-let clusters = cy.elements().kMeans({ k: 3 });
-clusters.forEach(cluster => {
-  cluster.addClass('highlighted');
-});
+            node.on('mouseout', function () { tooltip.remove(); });
+        });
+    </script>
 
-// Graph Traversal: Depth-First Search (DFS)
-cy.elements().dfs({
-  roots: '#N0',
-  visit: function (node) { console.log("DFS visiting: ", node.id()); }
-});
-
-// Add tooltips using tippy.js (external library)
-cy.on('mouseover', 'node', function (event) {
-  let node = event.target;
-  let tooltip = document.createElement('div');
-  tooltip.className = 'tooltip';
-  tooltip.innerText = Node: ${node.id()};
-  document.body.appendChild(tooltip);
-  tooltip.style.left = event.renderedPosition.x + 'px';
-  tooltip.style.top = event.renderedPosition.y + 'px';
-});
 </body>
-
 </html>
+
