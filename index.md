@@ -1,7 +1,7 @@
 ---
-title: My Assignment Blog
+title: Cystoscape.js
 ---
-# Welcome to My Blog  
+# Welcome to Our Blog  
 This is my assignment blog where I showcase code and output examples.
 
 ## 📝 Latest Posts
