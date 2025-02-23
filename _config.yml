@@ -1,9 +1,19 @@
 title: "Exposition Assignment - Learning Cytoscape.js"
 author: "Group J048"
-description: "A blog explaining the features, installation, and usage of Cytoscape.js."
-baseurl: "" 
-url: "https://your-username.github.io"
-theme: minima
+description: "A blog explaining Cytoscape.js"
+baseurl: "/J048_PSDV"
+url: "https://1-vansh-8.github.io"
+theme: minimal-mistakes-jekyll
 plugins:
   - jekyll-feed
   - jekyll-seo-tag
+  - jekyll-sitemap
+  - jekyll-include-cache
+
+# Navbar settings
+header_pages:
+  - index.md
+  - about.md
+  - blog.md
+
+show_excerpts: true
